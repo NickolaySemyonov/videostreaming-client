@@ -1,6 +1,6 @@
 import axios from "axios";
 
-let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
 
 const api = axios.create({
   baseURL: "http://localhost:8080",
@@ -9,8 +9,14 @@ const api = axios.create({
 
 export const refreshRequest = async () => {
   try {
-    await axios.post("/refresh", null, { withCredentials: true });
-    return true;
+    // Create a separate axios instance for refresh to avoid interceptor loops
+    const refreshApi = axios.create({
+      baseURL: "http://localhost:8080",
+      withCredentials: true,
+    });
+
+    const response = await refreshApi.post("/auth/refresh");
+    return response.data;
   } catch (error) {
     console.error("Refresh error:", error);
     throw error;
@@ -23,31 +29,27 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        // Wait for refresh to complete
-        await new Promise<void>((resolve) => {
-          const checkInterval = setInterval(() => {
-            if (!isRefreshing) {
-              clearInterval(checkInterval);
-              resolve();
-            }
-          }, 100);
-        });
+      if (refreshPromise) {
+        // Wait for the existing refresh to complete
+        await refreshPromise;
+        // Retry the original request
         return api(originalRequest);
       }
 
       originalRequest._retry = true;
-      isRefreshing = true;
 
-      try {
-        await refreshRequest();
-        return api(originalRequest);
-      } catch (refreshError) {
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+      // Store the refresh promise so other requests can wait for it
+      refreshPromise = refreshRequest()
+        .catch((refreshError) => {
+          window.location.href = "/login";
+          throw refreshError;
+        })
+        .finally(() => {
+          refreshPromise = null;
+        });
+
+      await refreshPromise;
+      return api(originalRequest);
     }
 
     return Promise.reject(error);

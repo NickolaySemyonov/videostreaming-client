@@ -1,6 +1,5 @@
 import { MainLayout } from "../components/layouts/MainLayout";
 import { ChannelDataSection } from "../components/layouts/ChannelDataSection";
-import { ChannelVideoSection } from "../components/layouts/ChannelVideoSection";
 import { useState } from "react";
 import { CreateVideoForm } from "../components/forms/VideoCreateForm";
 
@@ -15,7 +14,6 @@ export const MyChannelPage = () => {
       </button>
 
       <ChannelDataSection />
-      <ChannelVideoSection />
     </MainLayout>
   );
 };

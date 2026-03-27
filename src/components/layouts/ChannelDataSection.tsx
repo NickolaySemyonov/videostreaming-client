@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { myChannelRequest } from "../../api/requests";
+import { ChannelVideoSection } from "./ChannelVideoSection";
 interface IUserResponse {
   id: number;
   email: string;
@@ -53,6 +54,7 @@ export const ChannelDataSection = () => {
         <p>Tag: {channel.channelTag}</p>
         <p>Email: {channel.email}</p>
         <p>Created: {new Date(channel.createdAt).toLocaleDateString()}</p>
+        <ChannelVideoSection channelTag={channel.channelTag} />
       </div>
     );
   };

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import type { IVideoCard } from "../../api/dto";
-import { feedRequest } from "../../api/requests";
+import { channelVideosRequest } from "../../api/requests";
 import { Link } from "react-router-dom";
 import { VideoCard } from "../ui/VideoCard";
 
-export const ChannelVideoSection = () => {
+export const ChannelVideoSection = ({ channelTag }: { channelTag: string }) => {
   const [videos, setVideos] = useState<IVideoCard[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +13,7 @@ export const ChannelVideoSection = () => {
     const fetchChannelVideos = async () => {
       try {
         setLoading(true);
-        const response = await feedRequest();
+        const response = await channelVideosRequest(channelTag);
         setVideos(response);
       } catch (err) {
         setError("Failed to load videos");

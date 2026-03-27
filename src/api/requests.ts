@@ -9,9 +9,6 @@ import api from "./api";
 
 const BASE_URL = "http://localhost:8080";
 
-// axios.defaults.baseURL = BASE_URL;
-// axios.defaults.withCredentials = true;
-
 export const getMediaUrl = (fileType: string, fileName: string) => {
   return `${BASE_URL}/media/${fileType}/${fileName}`;
 };
@@ -20,7 +17,7 @@ export const getMediaUrl = (fileType: string, fileName: string) => {
 
 export const loginRequest = async (req: IAuthRequest) => {
   try {
-    const res = await api.post("/login", {
+    const res = await api.post("/auth/login", {
       email: req.email,
       password: req.password,
     });
@@ -34,7 +31,7 @@ export const loginRequest = async (req: IAuthRequest) => {
 
 export const registerRequest = async (req: IAuthRequest) => {
   try {
-    const res = await api.post("/register", {
+    const res = await api.post("/auth/register", {
       email: req.email,
       password: req.password,
     });
@@ -48,7 +45,7 @@ export const registerRequest = async (req: IAuthRequest) => {
 
 export const logoutRequest = async () => {
   try {
-    const res = await api.post("/logout");
+    const res = await api.post("/auth/logout");
     return res.data;
   } catch (error) {
     console.error("Logout error:", error);
@@ -56,15 +53,6 @@ export const logoutRequest = async () => {
   }
 };
 
-export const refreshRequest = async () => {
-  try {
-    const res = await api.post("/refresh");
-    return res.data;
-  } catch (error) {
-    console.error("Refresh error:", error);
-    throw error;
-  }
-};
 //#endregion
 
 //#region my channel
@@ -79,9 +67,11 @@ export const myChannelRequest = async () => {
   }
 };
 
-export const myVideosRequest = async (): Promise<IVideoCard[]> => {
+export const channelVideosRequest = async (
+  channelTag: string,
+): Promise<IVideoCard[]> => {
   try {
-    const res = await api.get("/me/video");
+    const res = await api.get(`/channel/${channelTag}/video`);
     return res.data;
   } catch (error) {
     console.error("error fetching my videos:", error);
